@@ -11,16 +11,19 @@ import android.os.Looper
 import android.util.AttributeSet
 import android.util.DisplayMetrics
 import android.util.Log
-import android.view.*
+import android.view.ActionMode
 import android.view.ActionMode.Callback
-import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+import android.view.GestureDetector
+import android.view.Menu
+import android.view.MenuItem
+import android.view.MotionEvent
+import android.view.View
 import android.webkit.ConsoleMessage
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.widget.PopupWindow
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.core.content.ContextCompat
 import androidx.core.view.GestureDetectorCompat
 import com.folioreader.Config
 import com.folioreader.Constants
@@ -37,7 +40,6 @@ import com.folioreader.util.AppUtil
 import com.folioreader.util.HighlightUtil
 import com.folioreader.util.UiUtil
 import dalvik.system.PathClassLoader
-import kotlinx.android.synthetic.main.text_selection.view.*
 import org.json.JSONObject
 import org.springframework.util.ReflectionUtils
 import java.lang.ref.WeakReference
@@ -98,7 +100,7 @@ class FolioWebView : WebView {
     private var selectionRect = Rect()
     private val popupRect = Rect()
     private var popupWindow = PopupWindow()
-    private lateinit var viewTextSelection: View
+//    private lateinit var viewTextSelection: View
     private var isScrollingCheckDuration: Int = 0
     private var isScrollingRunnable: Runnable? = null
     private var oldScrollX: Int = 0
@@ -278,10 +280,14 @@ class FolioWebView : WebView {
             GestureDetectorCompat(context, VerticalGestureListener())
         }
 
-        initViewTextSelection()
+        try {
+//            initViewTextSelection()
+        }catch (ignored: Exception){
+            Log.e(LOG_TAG, "-> initViewTextSelection -> $ignored")
+        }
     }
 
-    fun initViewTextSelection() {
+    /*fun initViewTextSelection() {
         Log.v(LOG_TAG, "-> initViewTextSelection")
 
         val textSelectionMiddleDrawable = ContextCompat.getDrawable(
@@ -340,7 +346,7 @@ class FolioWebView : WebView {
             dismissPopupWindow()
             loadUrl("javascript:onTextSelectionItemClicked(${it.id})")
         }
-    }
+    }*/
 
     @JavascriptInterface
     fun onTextSelectionItemClicked(id: Int, selectedText: String?) {
@@ -720,11 +726,11 @@ class FolioWebView : WebView {
         currentSelectionRect.bottom = (bottom * density).toInt()
         Log.d(LOG_TAG, "-> setSelectionRect -> $currentSelectionRect")
 
-        computeTextSelectionRect(currentSelectionRect)
-        uiHandler.post { showTextSelectionPopup() }
+//        computeTextSelectionRect(currentSelectionRect)
+//        uiHandler.post { showTextSelectionPopup() }
     }
 
-    private fun computeTextSelectionRect(currentSelectionRect: Rect) {
+    /*private fun computeTextSelectionRect(currentSelectionRect: Rect) {
         Log.v(LOG_TAG, "-> computeTextSelectionRect")
 
         val viewportRect = folioActivityCallback.getViewportRect(DisplayUnit.PX)
@@ -871,5 +877,5 @@ class FolioWebView : WebView {
             Log.v(LOG_TAG, "-> doNotShowTextSelectionPopup")
         }
 
-    }
+    }*/
 }

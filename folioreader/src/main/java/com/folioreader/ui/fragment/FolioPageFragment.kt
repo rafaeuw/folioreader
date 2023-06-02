@@ -55,10 +55,6 @@ import org.readium.r2.shared.Locations
 import java.util.*
 import java.util.regex.Pattern
 
-
-/**
- * Created by mahavir on 4/2/16.
- */
 class FolioPageFragment(private var pageViewModel: PageTrackerViewModel) : Fragment(),
     HtmlTaskCallback, MediaControllerCallbacks, FolioWebView.SeekBarListener {
     override fun onResume() {
@@ -114,7 +110,7 @@ class FolioPageFragment(private var pageViewModel: PageTrackerViewModel) : Fragm
     private var mScrollSeekbar: VerticalSeekbar? = null
     var mWebview: FolioWebView? = null
     lateinit var webViewPager: WebViewPager
-    private var mPagesLeftTextView: TextView? = null
+//    private var mPagesLeftTextView: TextView? = null
     private var mMinutesLeftTextView: TextView? = null
     private var mActivityCallback: FolioActivityCallback? = null
 
@@ -180,7 +176,7 @@ class FolioPageFragment(private var pageViewModel: PageTrackerViewModel) : Fragm
         highlightStyle =
             HighlightImpl.HighlightStyle.classForStyle(HighlightImpl.HighlightStyle.Normal)
         mRootView = inflater.inflate(R.layout.folio_page_fragment, container, false)
-        mPagesLeftTextView = mRootView!!.findViewById<View>(R.id.pagesLeft) as TextView
+//        mPagesLeftTextView = mRootView!!.findViewById<View>(R.id.pagesLeft) as TextView
         mMinutesLeftTextView = mRootView!!.findViewById<View>(R.id.minutesLeft) as TextView
 
         mConfig = AppUtil.getSavedConfig(context)
@@ -267,7 +263,7 @@ class FolioPageFragment(private var pageViewModel: PageTrackerViewModel) : Fragm
 
         if (isAdded) {
             mWebview!!.dismissPopupWindow()
-            mWebview!!.initViewTextSelection()
+//            mWebview!!.initViewTextSelection()
             loadingView!!.updateTheme()
             loadingView!!.show()
             mIsPageReloaded = true
