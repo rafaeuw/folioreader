@@ -118,5 +118,7 @@ dependencies {
 
     // Lifecycle
     implementation "androidx.lifecycle:lifecycle-extensions:$versions.lifecycle"
+
+    implementation 'androidx.core:core:1.3.0'
 }
 apply from: '../folioreader/bintray/bintrayv1.gradle'

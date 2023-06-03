@@ -13,7 +13,9 @@ import android.util.DisplayMetrics
 import android.util.Log
 import android.view.ActionMode
 import android.view.ActionMode.Callback
+import android.view.ContextThemeWrapper
 import android.view.GestureDetector
+import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
@@ -24,6 +26,7 @@ import android.webkit.WebView
 import android.widget.PopupWindow
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
 import androidx.core.view.GestureDetectorCompat
 import com.folioreader.Config
 import com.folioreader.Constants
@@ -40,6 +43,15 @@ import com.folioreader.util.AppUtil
 import com.folioreader.util.HighlightUtil
 import com.folioreader.util.UiUtil
 import dalvik.system.PathClassLoader
+import kotlinx.android.synthetic.main.text_selection.view.blueHighlight
+import kotlinx.android.synthetic.main.text_selection.view.copySelection
+import kotlinx.android.synthetic.main.text_selection.view.defineSelection
+import kotlinx.android.synthetic.main.text_selection.view.deleteHighlight
+import kotlinx.android.synthetic.main.text_selection.view.greenHighlight
+import kotlinx.android.synthetic.main.text_selection.view.pinkHighlight
+import kotlinx.android.synthetic.main.text_selection.view.shareSelection
+import kotlinx.android.synthetic.main.text_selection.view.underlineHighlight
+import kotlinx.android.synthetic.main.text_selection.view.yellowHighlight
 import org.json.JSONObject
 import org.springframework.util.ReflectionUtils
 import java.lang.ref.WeakReference
@@ -100,7 +112,7 @@ class FolioWebView : WebView {
     private var selectionRect = Rect()
     private val popupRect = Rect()
     private var popupWindow = PopupWindow()
-//    private lateinit var viewTextSelection: View
+    private lateinit var viewTextSelection: View
     private var isScrollingCheckDuration: Int = 0
     private var isScrollingRunnable: Runnable? = null
     private var oldScrollX: Int = 0
@@ -272,7 +284,7 @@ class FolioWebView : WebView {
 
         uiHandler = Handler()
         displayMetrics = resources.displayMetrics
-        density = displayMetrics!!.density
+        density = displayMetrics?.density ?: 0f
 
         gestureDetector = if (folioActivityCallback.direction == Config.Direction.HORIZONTAL) {
             GestureDetectorCompat(context, HorizontalGestureListener())
@@ -281,13 +293,13 @@ class FolioWebView : WebView {
         }
 
         try {
-//            initViewTextSelection()
+            initViewTextSelection()
         }catch (ignored: Exception){
             Log.e(LOG_TAG, "-> initViewTextSelection -> $ignored")
         }
     }
 
-    /*fun initViewTextSelection() {
+    fun initViewTextSelection() {
         Log.v(LOG_TAG, "-> initViewTextSelection")
 
         val textSelectionMiddleDrawable = ContextCompat.getDrawable(
@@ -296,8 +308,8 @@ class FolioWebView : WebView {
         )
         handleHeight = textSelectionMiddleDrawable?.intrinsicHeight ?: (24 * density).toInt()
 
-        val config = AppUtil.getSavedConfig(context)!!
-        val ctw = if (config.isNightMode) {
+        val config = AppUtil.getSavedConfig(context)
+        val ctw = if (config?.isNightMode == true) {
             ContextThemeWrapper(context, R.style.FolioNightTheme)
         } else {
             ContextThemeWrapper(context, R.style.FolioDayTheme)
@@ -346,7 +358,7 @@ class FolioWebView : WebView {
             dismissPopupWindow()
             loadUrl("javascript:onTextSelectionItemClicked(${it.id})")
         }
-    }*/
+    }
 
     @JavascriptInterface
     fun onTextSelectionItemClicked(id: Int, selectedText: String?) {
@@ -379,10 +391,12 @@ class FolioWebView : WebView {
         val bundle = Bundle()
         bundle.putString(Constants.SELECTED_WORD, selectedText?.trim())
         dictionaryFragment.arguments = bundle
-        dictionaryFragment.show(
-            parentFragment.fragmentManager!!,
-            DictionaryFragment::class.java.name
-        )
+        parentFragment.fragmentManager?.let {
+            dictionaryFragment.show(
+                it,
+                DictionaryFragment::class.java.name
+            )
+        }
     }
 
     private fun onHighlightColorItemsClicked(style: HighlightStyle, isAlreadyCreated: Boolean) {
@@ -501,7 +515,7 @@ class FolioWebView : WebView {
     }
 
     override fun onScrollChanged(l: Int, t: Int, oldl: Int, oldt: Int) {
-        if (mScrollListener != null) mScrollListener!!.onScrollChange(t)
+        if (mScrollListener != null) mScrollListener?.onScrollChange(t)
         super.onScrollChanged(l, t, oldl, oldt)
 
         if (lastScrollType == LastScrollType.USER) {
@@ -648,7 +662,7 @@ class FolioWebView : WebView {
             val mViewsField = ReflectionUtils.findField(windowManagerGlobalClass, "mViews")
             mViewsField.isAccessible = true
             val mViews = mViewsField.get(mGlobal) as ArrayList<View>
-            val config = AppUtil.getSavedConfig(context)!!
+            val config = AppUtil.getSavedConfig(context)
 
             for (view in mViews) {
                 val handleViewClass =
@@ -658,7 +672,7 @@ class FolioWebView : WebView {
                     val mDrawableField = ReflectionUtils.findField(handleViewClass, "mDrawable")
                     mDrawableField.isAccessible = true
                     val mDrawable = mDrawableField.get(view) as BitmapDrawable
-                    UiUtil.setColorIntToDrawable(config.currentThemeColor, mDrawable)
+                    config?.currentThemeColor?.let { UiUtil.setColorIntToDrawable(it, mDrawable) }
                 }
             }
 
@@ -678,7 +692,7 @@ class FolioWebView : WebView {
             val mViewsField = ReflectionUtils.findField(windowManagerGlobalClass, "mViews")
             mViewsField.isAccessible = true
             val mViews = mViewsField.get(mGlobal) as ArrayList<View>
-            val config = AppUtil.getSavedConfig(context)!!
+            val config = AppUtil.getSavedConfig(context)
 
             for (view in mViews) {
                 val popupDecorViewClass =
@@ -711,7 +725,7 @@ class FolioWebView : WebView {
                     ReflectionUtils.findField(popupTouchHandleDrawableClass, "mDrawable")
                 mDrawableField.isAccessible = true
                 val mDrawable = mDrawableField.get(mChildren[0]) as Drawable
-                UiUtil.setColorIntToDrawable(config.currentThemeColor, mDrawable)
+                config?.currentThemeColor?.let { UiUtil.setColorIntToDrawable(it, mDrawable) }
             }
         }
     }
@@ -741,7 +755,7 @@ class FolioWebView : WebView {
             uiHandler.post {
                 popupWindow.dismiss()
                 if(isScrollingRunnable!=null){
-                    uiHandler.removeCallbacks(isScrollingRunnable!!)
+                    uiHandler.removeCallbacks(isScrollingRunnable?)
                 }
             }
             return
@@ -826,7 +840,7 @@ class FolioWebView : WebView {
     }
 
     private fun showTextSelectionPopup() {
-        val config = AppUtil.getSavedConfig(context)!!
+        val config = AppUtil.getSavedConfig(context)?
         if(config.isShowTextSelection) {
             Log.v(LOG_TAG, "-> showTextSelectionPopup")
             Log.d(LOG_TAG, "-> showTextSelectionPopup -> To be laid out popupRect -> $popupRect")
@@ -836,7 +850,7 @@ class FolioWebView : WebView {
 
             isScrollingRunnable = Runnable {
                 if(isScrollingRunnable!=null){
-                    uiHandler.removeCallbacks(isScrollingRunnable!!)
+                    uiHandler.removeCallbacks(isScrollingRunnable?)
                 }
                 val currentScrollX = scrollX
                 val currentScrollY = scrollY
@@ -859,7 +873,7 @@ class FolioWebView : WebView {
                     isScrollingCheckDuration += IS_SCROLLING_CHECK_TIMER
                     if (isScrollingCheckDuration < IS_SCROLLING_CHECK_MAX_DURATION && !destroyed) {
                         if(isScrollingRunnable!=null) {
-                            uiHandler.postDelayed(isScrollingRunnable!!,
+                            uiHandler.postDelayed(isScrollingRunnable?,
                                 IS_SCROLLING_CHECK_TIMER.toLong())
                         }
                     }
@@ -867,11 +881,11 @@ class FolioWebView : WebView {
             }
 
             if(isScrollingRunnable!=null) {
-                uiHandler.removeCallbacks(isScrollingRunnable!!)
+                uiHandler.removeCallbacks(isScrollingRunnable?)
             }
             isScrollingCheckDuration = 0
             if (!destroyed && isScrollingRunnable!=null) {
-                uiHandler.postDelayed(isScrollingRunnable!!, IS_SCROLLING_CHECK_TIMER.toLong())
+                uiHandler.postDelayed(isScrollingRunnable?, IS_SCROLLING_CHECK_TIMER.toLong())
             }
         } else {
             Log.v(LOG_TAG, "-> doNotShowTextSelectionPopup")

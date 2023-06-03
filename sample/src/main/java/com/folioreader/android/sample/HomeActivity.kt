@@ -17,6 +17,7 @@ package com.folioreader.android.sample
 
 import android.graphics.Color
 import android.os.Bundle
+import android.os.Environment
 import android.util.Log
 import android.view.View
 import android.view.WindowManager
@@ -34,7 +35,12 @@ import com.folioreader.model.locators.ReadLocator.Companion.fromJson
 import com.folioreader.util.AppUtil.Companion.getSavedConfig
 import com.folioreader.util.OnHighlightListener
 import com.folioreader.util.ReadLocatorListener
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.ResponseBody
 import java.io.BufferedReader
+import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStreamReader
 
@@ -82,6 +88,44 @@ class HomeActivity : AppCompatActivity(), OnHighlightListener, ReadLocatorListen
         })
 
 
+        Thread {
+            val epubUrl = "https://filesamples.com/samples/ebook/epub/Sway.epub"
+//            val epubUrl = "https://hamedtaherpour.github.io/sample-assets/epub/book-8.epub"
+//            val epubUrl = "https://filesamples.com/samples/ebook/epub/Around%20the%20World%20in%2028%20Languages.epub"// download error
+//            val epubUrl = "https://github.com/IDPF/epub3-samples/releases/download/20170606/haruko-html-jpeg.epub"
+//            val epubUrl = "https://github.com/IDPF/epub3-samples/releases/download/20170606/hefty-water.epub"
+            val localFilePath = downloadEPUB(epubUrl, "book-8")
+            Log.e("112233", "downloaded local file path: $localFilePath")
+
+            runOnUiThread {
+                val folioReader = FolioReader.get()
+                val config = Config()
+                config.isShowBookMarkBtn = false
+                config.isShowSizeChangerBtn = false
+                config.isShowSearchBtn = false
+                config.isShowBackBtn = true
+                folioReader.setConfig(config, true)
+                    .openBook(localFilePath)
+            }
+
+        }.start()
+    }
+
+    private fun downloadEPUB(url: String, name: String): String {
+        val httpClient = OkHttpClient()
+
+        val request = Request.Builder().url(url).build()
+
+        val response = httpClient.newCall(request).execute()
+//        val responseBody = response.body()
+        val responseBody: ResponseBody? = response.body()
+
+
+        val epubFile = File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "$name.epub")
+        val outputStream = FileOutputStream(epubFile)
+        outputStream.write(responseBody?.bytes())
+
+        return epubFile.absolutePath
     }
 
     private val lastReadLocator: ReadLocator?
