@@ -405,7 +405,7 @@ class FolioPageFragment(private var pageViewModel: PageTrackerViewModel) : Fragm
         if (activity is FolioActivityCallback)
             mWebview?.setFolioActivityCallback((activity as FolioActivityCallback))
 
-        setupScrollBar()
+//        setupScrollBar()
         mWebview?.addOnLayoutChangeListener { view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
             val height =
                 (mWebview?.scale?.let { mWebview?.contentHeight?.times(it) })?.toDouble()
@@ -694,7 +694,7 @@ class FolioPageFragment(private var pageViewModel: PageTrackerViewModel) : Fragm
     }
 
     private fun setupScrollBar() {
-        mConfig?.currentThemeColor?.let { UiUtil.setColorIntToDrawable(it, mScrollSeekbar?.progressDrawable) }
+//        mConfig?.currentThemeColor?.let { UiUtil.setColorIntToDrawable(it, mScrollSeekbar?.progressDrawable) }
         val thumbDrawable = activity?.let { ContextCompat.getDrawable(it, R.drawable.icons_sroll) }
         mConfig?.currentThemeColor?.let { UiUtil.setColorIntToDrawable(it, thumbDrawable) }
         mScrollSeekbar?.thumb = thumbDrawable
