@@ -111,7 +111,7 @@ class FolioPageFragment(private var pageViewModel: PageTrackerViewModel) : Fragm
     var mWebview: FolioWebView? = null
     lateinit var webViewPager: WebViewPager
 //    private var mPagesLeftTextView: TextView? = null
-    private var mMinutesLeftTextView: TextView? = null
+//    private var mMinutesLeftTextView: TextView? = null
     private var mActivityCallback: FolioActivityCallback? = null
 
     private var mTotalMinutes: Int = 0
@@ -177,7 +177,7 @@ class FolioPageFragment(private var pageViewModel: PageTrackerViewModel) : Fragm
             HighlightImpl.HighlightStyle.classForStyle(HighlightImpl.HighlightStyle.Normal)
         mRootView = inflater.inflate(R.layout.folio_page_fragment, container, false)
 //        mPagesLeftTextView = mRootView!!.findViewById<View>(R.id.pagesLeft) as TextView
-        mMinutesLeftTextView = mRootView!!.findViewById<View>(R.id.minutesLeft) as TextView
+//        mMinutesLeftTextView = mRootView!!.findViewById<View>(R.id.minutesLeft) as TextView
 
         mConfig = AppUtil.getSavedConfig(context)
 
