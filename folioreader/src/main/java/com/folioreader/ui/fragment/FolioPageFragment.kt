@@ -178,8 +178,8 @@ class FolioPageFragment(private var pageViewModel: PageTrackerViewModel) : Fragm
         highlightStyle =
             HighlightImpl.HighlightStyle.classForStyle(HighlightImpl.HighlightStyle.Normal)
         mRootView = inflater.inflate(R.layout.folio_page_fragment, container, false)
-        mPagesLeftTextView = mRootView?.findViewById<View>(R.id.pagesLeft) as TextView
-        mMinutesLeftTextView = mRootView?.findViewById<View>(R.id.minutesLeft) as TextView
+        mPagesLeftTextView = mRootView?.findViewById(R.id.pagesLeft)
+        mMinutesLeftTextView = mRootView?.findViewById(R.id.minutesLeft)
 
         mConfig = AppUtil.getSavedConfig(context)
 
@@ -204,7 +204,7 @@ class FolioPageFragment(private var pageViewModel: PageTrackerViewModel) : Fragm
      */
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun pauseButtonClicked(event: MediaOverlayPlayPauseEvent) {
-        if (isAdded && spineItem?.href == event.href) {
+        if (isAdded && spineItem.href == event.href) {
             mediaController?.stateChanged(event)
         }
     }
@@ -647,7 +647,7 @@ class FolioPageFragment(private var pageViewModel: PageTrackerViewModel) : Fragm
         try {
             synchronized(this) {
                 mWebview?.loadUrl(getString(R.string.callComputeLastReadCfi))
-                (this as java.lang.Object).wait(5000)
+                (this as Object).wait(5000)
             }
         } catch (e: InterruptedException) {
             Log.e(LOG_TAG, "-> ", e)
@@ -671,7 +671,7 @@ class FolioPageFragment(private var pageViewModel: PageTrackerViewModel) : Fragm
             intent.putExtra(FolioReader.EXTRA_READ_LOCATOR, lastReadLocator as Parcelable?)
             context?.let { LocalBroadcastManager.getInstance(it).sendBroadcast(intent) }
 
-            (this as java.lang.Object).notify()
+            (this as Object).notify()
         }
     }
 
@@ -701,7 +701,7 @@ class FolioPageFragment(private var pageViewModel: PageTrackerViewModel) : Fragm
     }
 
     private fun initSeekbar() {
-        mScrollSeekbar = mRootView?.findViewById<View>(R.id.scrollSeekbar) as VerticalSeekbar
+        mScrollSeekbar = mRootView?.findViewById(R.id.scrollSeekbar)
         mScrollSeekbar?.progressDrawable
             ?.setColorFilter(
                 resources
