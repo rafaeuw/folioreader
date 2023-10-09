@@ -37,12 +37,14 @@ import android.util.Log
 import android.view.*
 import android.widget.EditText
 import android.widget.Toast
+import android.widget.TextView
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.folioreader.Config
 import com.folioreader.Constants
@@ -66,6 +68,8 @@ import com.folioreader.ui.view.MediaControllerCallback
 import com.folioreader.util.AppUtil
 import com.folioreader.util.FileUtil
 import com.folioreader.util.UiUtil
+import com.folioreader.viewmodels.PageTrackerViewModel
+import com.folioreader.viewmodels.PageTrackerViewModelFactory
 import org.greenrobot.eventbus.EventBus
 import org.readium.r2.shared.Link
 import org.readium.r2.shared.Publication
@@ -76,6 +80,7 @@ import org.readium.r2.streamer.server.Server
 import java.lang.ref.WeakReference
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.ceil
 
 class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControllerCallback,
     View.OnSystemUiVisibilityChangeListener {
@@ -121,6 +126,7 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
     private var density: Float = 0.toFloat()
     private var topActivity: Boolean? = null
     private var taskImportance: Int = 0
+    private lateinit var pageTrackerViewModel: PageTrackerViewModel
 
     companion object {
 
@@ -292,6 +298,17 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         initActionBar()
         initMediaController()
+
+        val pageCountTextView = findViewById<TextView>(R.id.pageCount)
+
+        // pageTrackerViewModel
+        pageTrackerViewModel = ViewModelProvider(this,
+            PageTrackerViewModelFactory()
+        )[PageTrackerViewModel::class.java]
+
+        pageTrackerViewModel.chapterPage.observe(this, androidx.lifecycle.Observer {
+            pageCountTextView.text = it
+        })
 
         if (Build.VERSION.SDK_INT < 33) {
             if (ContextCompat.checkSelfPermission(
@@ -654,7 +671,7 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
         mFolioPageViewPager!!.setDirection(newDirection)
         mFolioPageFragmentAdapter = FolioPageFragmentAdapter(
             supportFragmentManager,
-            spine, bookFileName, mBookId
+            spine, bookFileName, mBookId, pageTrackerViewModel
         )
         mFolioPageViewPager!!.adapter = mFolioPageFragmentAdapter
         mFolioPageViewPager!!.currentItem = currentChapterIndex
@@ -805,12 +822,23 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
         }
     }
 
-    override fun toggleSystemUI() {
+    private fun showPageCounter(){
+        val pageCountTextView = findViewById<TextView>(R.id.pageCount)
+        pageCountTextView.visibility = View.VISIBLE
+    }
 
+    private fun hidePageCounter() {
+        val pageCountTextView = findViewById<TextView>(R.id.pageCount)
+        pageCountTextView.visibility = View.INVISIBLE
+    }
+
+    override fun toggleSystemUI() {
         if (distractionFreeMode) {
             showSystemUI()
+            showPageCounter()
         } else {
             hideSystemUI()
+            hidePageCounter()
         }
     }
 
@@ -828,6 +856,9 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
                 appBarLayout!!.setTopMargin(statusBarHeight)
             onSystemUiVisibilityChange(View.SYSTEM_UI_FLAG_VISIBLE)
         }
+        val pageCountTextView = findViewById<TextView>(R.id.pageCount)
+
+
     }
 
     private fun hideSystemUI() {
@@ -852,6 +883,8 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
             // Specified 1 just to mock anything other than View.SYSTEM_UI_FLAG_VISIBLE
             onSystemUiVisibilityChange(1)
         }
+        val pageCountTextView = findViewById<TextView>(R.id.pageCount)
+
     }
 
     override fun getEntryReadLocator(): ReadLocator? {
@@ -974,6 +1007,7 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
                 positionOffset: Float,
                 positionOffsetPixels: Int
             ) {
+                pageTrackerViewModel.setCurrentChapter(position + 1, direction.toString())
             }
 
             override fun onPageSelected(position: Int) {
@@ -987,6 +1021,7 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
                 )
                 mediaControllerFragment!!.setPlayButtonDrawable()
                 currentChapterIndex = position
+                pageTrackerViewModel.setCurrentChapter(position + 1, direction.toString())
             }
 
             override fun onPageScrollStateChanged(state: Int) {
@@ -1021,7 +1056,7 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
         mFolioPageViewPager!!.setDirection(direction)
         mFolioPageFragmentAdapter = FolioPageFragmentAdapter(
             supportFragmentManager,
-            spine, bookFileName, mBookId
+            spine, bookFileName, mBookId, pageTrackerViewModel
         )
         mFolioPageViewPager!!.adapter = mFolioPageFragmentAdapter
 
