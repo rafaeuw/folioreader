@@ -3,6 +3,7 @@ package com.folioreader.ui.view
 import android.animation.Animator
 import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.graphics.PorterDuff
 import android.os.Build
 import android.os.Bundle
@@ -28,6 +29,11 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.android.synthetic.main.view_config.*
 import org.greenrobot.eventbus.EventBus
+import java.util.Timer
+import java.util.TimerTask
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledFuture
+import java.util.concurrent.TimeUnit
 
 /**
  * Created by mobisys2 on 11/16/2016.
@@ -80,9 +86,9 @@ class ConfigBottomSheetDialogFragment : BottomSheetDialogFragment() {
     private fun initViews() {
         inflateView()
         configFonts()
-        view_config_font_size_seek_bar.progress = config.fontSize
-        configSeekBar()
-        selectFont(config.font, false)
+        config_textSize.text = config.fontSize.toString()
+        configFontSizeButtons()
+        selectFont(config.font)
         isNightMode = config.isNightMode
         if (isNightMode) {
             container.setBackgroundColor(ContextCompat.getColor(context!!, R.color.night))
@@ -169,8 +175,10 @@ class ConfigBottomSheetDialogFragment : BottomSheetDialogFragment() {
         }
     }
 
-    private fun configFonts() {
 
+    private var fontChanged = false
+    @SuppressLint("ResourceAsColor")
+    private fun configFonts() {
         val colorStateList = UiUtil.getColorList(
             config.currentThemeColor,
             ContextCompat.getColor(context!!, R.color.grey_color)
@@ -203,7 +211,9 @@ class ConfigBottomSheetDialogFragment : BottomSheetDialogFragment() {
                     position: Int,
                     id: Long
                 ) {
-                    selectFont(adapter.fontKeyList[position], true)
+                    val selectedFont = adapter.fontKeyList[position]
+                    selectFont(selectedFont)
+                    fontChanged = true // Set the fontChanged flag
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -211,13 +221,15 @@ class ConfigBottomSheetDialogFragment : BottomSheetDialogFragment() {
             }
     }
 
-    private fun selectFont(selectedFont: String, isReloadNeeded: Boolean) {
+    private fun selectFont(selectedFont: String) {
         // parse font from name
         config.font = selectedFont
+        AppUtil.saveConfig(activity, config)
 
-        if (isAdded && isReloadNeeded) {
-            AppUtil.saveConfig(activity, config)
+        // Check if the font has changed and post ReloadDataEvent if necessary
+        if (fontChanged) {
             EventBus.getDefault().post(ReloadDataEvent())
+            fontChanged = false // Reset the flag
         }
     }
 
@@ -282,28 +294,49 @@ class ConfigBottomSheetDialogFragment : BottomSheetDialogFragment() {
         colorAnimation.start()
     }
 
-    private fun configSeekBar() {
-        val thumbDrawable = ContextCompat.getDrawable(activity!!, R.drawable.seekbar_thumb)
-        UiUtil.setColorIntToDrawable(config.currentThemeColor, thumbDrawable)
-        UiUtil.setColorResToDrawable(
-            R.color.grey_color,
-            view_config_font_size_seek_bar.progressDrawable
-        )
-        view_config_font_size_seek_bar.thumb = thumbDrawable
+    private var debounceFuture: ScheduledFuture<*>? = null
+    private val debounceExecutor = Executors.newSingleThreadScheduledExecutor()
 
-        view_config_font_size_seek_bar.setOnSeekBarChangeListener(object :
-            SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                config.fontSize = progress
-                AppUtil.saveConfig(activity, config)
-                EventBus.getDefault().post(ReloadDataEvent())
+    private fun configFontSizeButtons() {
+        view_config_font_size_btn_decrease.setOnClickListener {
+            if (config.fontSize > 1) {
+                config.fontSize -= 1
+                config_textSize.text = config.fontSize.toString()
+
+                debounce {
+                    AppUtil.saveConfig(activity, config)
+                    EventBus.getDefault().post(ReloadDataEvent())
+                }
             }
+        }
 
-            override fun onStartTrackingTouch(seekBar: SeekBar) {}
+        view_config_font_size_btn_increase.setOnClickListener {
+            if (config.fontSize < 10) {
+                config.fontSize += 1
+                config_textSize.text = config.fontSize.toString()
 
-            override fun onStopTrackingTouch(seekBar: SeekBar) {}
-        })
+                debounce {
+                    AppUtil.saveConfig(activity, config)
+                    EventBus.getDefault().post(ReloadDataEvent())
+                    print("DEBOUNCE EXECUTEDD!!")
+                }
+            }
+        }
     }
+
+    fun debounce(
+        delayMillis: Long = 300,
+        action: () -> Unit
+    ) {
+        // Cancel any previous debounce task
+        debounceFuture?.cancel(false)
+
+        // Schedule a new debounce task
+        debounceFuture = debounceExecutor.schedule({
+            action()
+        }, delayMillis, TimeUnit.MILLISECONDS)
+    }
+
 
     private fun setToolBarColor() {
         if (isNightMode) {

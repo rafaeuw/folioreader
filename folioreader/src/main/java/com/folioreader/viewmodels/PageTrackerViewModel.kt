@@ -37,7 +37,6 @@ class PageTrackerViewModel : ViewModel() {
             _chapterPage.value = "Ch ${_currentChapter.value}"
         }else{
             _chapterPage.value = "${_currentChapter.value} - ${_currentPage.value}"
-            print("MY PRINT LINEEEE : " + isVerticalOrientation);
         }
 
 

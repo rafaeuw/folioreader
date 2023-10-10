@@ -52,43 +52,44 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/view_config_font_spinner" />
 
-    <ImageView
-        android:id="@+id/view_config_iv_label_font_small"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
-        android:layout_margin="8dp"
-        android:adjustViewBounds="false"
-        android:scaleType="center"
-        android:tint="@color/grey_color"
-        app:layout_constraintBottom_toTopOf="@+id/view5"
-        app:layout_constraintEnd_toStartOf="@+id/view_config_font_size_seek_bar"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/view4"
-        app:srcCompat="@drawable/ic_format_font_black_24dp" />
 
-    <ImageView
-        android:id="@+id/view_config_iv_label_font_big"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
-        android:layout_margin="8dp"
-        android:cropToPadding="false"
-        android:scaleType="center"
-        android:tint="@color/grey_color"
-        app:layout_constraintBottom_toTopOf="@+id/view5"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/view_config_font_size_seek_bar"
-        app:layout_constraintTop_toBottomOf="@+id/view4"
-        app:srcCompat="@drawable/ic_format_font_black_36dp" />
-
-    <SeekBar
-        android:id="@+id/view_config_font_size_seek_bar"
+    <LinearLayout
+        android:id="@+id/view_config_font_size_ll"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:max="4"
+        android:orientation="horizontal"
         app:layout_constraintBottom_toTopOf="@+id/view5"
-        app:layout_constraintEnd_toStartOf="@+id/view_config_iv_label_font_big"
-        app:layout_constraintStart_toEndOf="@+id/view_config_iv_label_font_small"
-        app:layout_constraintTop_toBottomOf="@+id/view4" />
+        app:layout_constraintEnd_toEndOf="parent"
+
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/view4">
+
+        <ImageButton
+            android:id="@+id/view_config_font_size_btn_decrease"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:src="@drawable/ic_format_font_black_24dp"
+            android:text="-" />
+        <TextView
+            android:id="@+id/config_textSize"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5"
+            android:text="15"
+            android:textStyle="bold"
+            android:textSize="24sp"
+            android:gravity="center" />
+        <ImageButton
+            android:id="@+id/view_config_font_size_btn_increase"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:src="@drawable/ic_format_font_black_36dp" />
+
+    </LinearLayout>
+
+
 
     <View
         android:id="@+id/view5"
@@ -98,7 +99,7 @@
         app:layout_constraintBottom_toTopOf="@+id/buttonVertical"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/view_config_iv_label_font_small" />
+        app:layout_constraintTop_toBottomOf="@+id/view_config_font_size_ll" />
 
     <com.folioreader.util.StyleableTextView
         android:id="@+id/buttonVertical"
