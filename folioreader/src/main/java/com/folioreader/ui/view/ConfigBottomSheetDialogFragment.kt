@@ -3,6 +3,7 @@ package com.folioreader.ui.view
 import android.animation.Animator
 import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.graphics.PorterDuff
 import android.os.Build
 import android.os.Bundle
@@ -28,6 +29,11 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.android.synthetic.main.view_config.*
 import org.greenrobot.eventbus.EventBus
+import java.util.Timer
+import java.util.TimerTask
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledFuture
+import java.util.concurrent.TimeUnit
 
 /**
  * Created by mobisys2 on 11/16/2016.
@@ -59,14 +65,15 @@ class ConfigBottomSheetDialogFragment : BottomSheetDialogFragment() {
         if (activity is FolioActivity)
             activityCallback = activity as FolioActivity
 
-        view.viewTreeObserver.addOnGlobalLayoutListener {
-            val dialog = dialog as BottomSheetDialog
-            val bottomSheet =
-                dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet) as FrameLayout?
-            val behavior = BottomSheetBehavior.from(bottomSheet!!)
-            behavior.state = BottomSheetBehavior.STATE_EXPANDED
-            behavior.peekHeight = 0
-        }
+//        view.viewTreeObserver.addOnGlobalLayoutListener {
+//            val dialog = dialog as BottomSheetDialog
+//            val bottomSheet =
+//                dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet) as FrameLayout?
+//            val behavior = BottomSheetBehavior.from(bottomSheet!!)
+//            behavior.state = BottomSheetBehavior.STATE_EXPANDED
+//            behavior.peekHeight = 500
+//
+//        }
 
         config = AppUtil.getSavedConfig(activity)!!
         initViews()
@@ -80,39 +87,49 @@ class ConfigBottomSheetDialogFragment : BottomSheetDialogFragment() {
     private fun initViews() {
         inflateView()
         configFonts()
-        view_config_font_size_seek_bar.progress = config.fontSize
-        configSeekBar()
-        selectFont(config.font, false)
+        view_config_fontSize.text = config.fontSize.toString()
+        configFontSizeButtons()
+        selectFont(config.font)
         isNightMode = config.isNightMode
         if (isNightMode) {
             container.setBackgroundColor(ContextCompat.getColor(context!!, R.color.night))
+            view_config_fontSize.setTextColor(ContextCompat.getColor(context!!, R.color.lightText))
+
+            view_config_font_size_btn_increase.background = ContextCompat.getDrawable(context!!, R.drawable.buttons_night_rounded_corner_background)
+            view_config_font_size_btn_decrease.background = ContextCompat.getDrawable(context!!, R.drawable.buttons_night_rounded_corner_background)
+
+            UiUtil.setColorResToDrawable(R.color.lightText, view_config_font_size_btn_increase.drawable)
+            UiUtil.setColorResToDrawable(R.color.lightText, view_config_font_size_btn_decrease.drawable)
+
+            view_config_font_type.background = ContextCompat.getDrawable(context!!, R.drawable.buttons_night_rounded_corner_background)
         } else {
             container.setBackgroundColor(ContextCompat.getColor(context!!, R.color.white))
+            view_config_fontSize.setTextColor(ContextCompat.getColor(context!!, R.color.night))
+
+            view_config_font_size_btn_increase.background = ContextCompat.getDrawable(context!!, R.drawable.buttons_day_rounded_corner_background)
+            view_config_font_size_btn_decrease.background = ContextCompat.getDrawable(context!!, R.drawable.buttons_day_rounded_corner_background)
+
+            UiUtil.setColorResToDrawable(R.color.night, view_config_font_size_btn_increase.drawable)
+            UiUtil.setColorResToDrawable(R.color.night, view_config_font_size_btn_decrease.drawable)
+
+            view_config_font_type.background = ContextCompat.getDrawable(context!!, R.drawable.buttons_day_rounded_corner_background)
         }
 
         if (isNightMode) {
             view_config_ib_day_mode.isSelected = false
             view_config_ib_night_mode.isSelected = true
-            UiUtil.setColorIntToDrawable(
-                config.currentThemeColor,
-                view_config_ib_night_mode.drawable
-            )
-            UiUtil.setColorResToDrawable(R.color.app_gray, view_config_ib_day_mode.drawable)
+
         } else {
             view_config_ib_day_mode.isSelected = true
             view_config_ib_night_mode.isSelected = false
-            UiUtil.setColorIntToDrawable(
-                config.currentThemeColor,
-                view_config_ib_day_mode!!.drawable
-            )
-            UiUtil.setColorResToDrawable(R.color.app_gray, view_config_ib_night_mode.drawable)
         }
     }
 
+    @SuppressLint("ResourceAsColor")
     private fun inflateView() {
 
         if (config.allowedDirection != Config.AllowedDirection.VERTICAL_AND_HORIZONTAL) {
-            view5.visibility = View.GONE
+//            view5.visibility = View.GONE
             buttonVertical.visibility = View.GONE
             buttonHorizontal.visibility = View.GONE
         }
@@ -124,8 +141,7 @@ class ConfigBottomSheetDialogFragment : BottomSheetDialogFragment() {
             view_config_ib_night_mode.isSelected = false
             setToolBarColor()
             setAudioPlayerBackground()
-            UiUtil.setColorResToDrawable(R.color.app_gray, view_config_ib_night_mode.drawable)
-            UiUtil.setColorIntToDrawable(config.currentThemeColor, view_config_ib_day_mode.drawable)
+
             dialog?.hide()
         }
 
@@ -134,11 +150,7 @@ class ConfigBottomSheetDialogFragment : BottomSheetDialogFragment() {
             toggleBlackTheme()
             view_config_ib_day_mode.isSelected = false
             view_config_ib_night_mode.isSelected = true
-            UiUtil.setColorResToDrawable(R.color.app_gray, view_config_ib_day_mode.drawable)
-            UiUtil.setColorIntToDrawable(
-                config.currentThemeColor,
-                view_config_ib_night_mode.drawable
-            )
+
             setToolBarColor()
             setAudioPlayerBackground()
             dialog?.hide()
@@ -169,8 +181,10 @@ class ConfigBottomSheetDialogFragment : BottomSheetDialogFragment() {
         }
     }
 
-    private fun configFonts() {
 
+    private var fontChanged = false
+    @SuppressLint("ResourceAsColor")
+    private fun configFonts() {
         val colorStateList = UiUtil.getColorList(
             config.currentThemeColor,
             ContextCompat.getColor(context!!, R.color.grey_color)
@@ -203,7 +217,9 @@ class ConfigBottomSheetDialogFragment : BottomSheetDialogFragment() {
                     position: Int,
                     id: Long
                 ) {
-                    selectFont(adapter.fontKeyList[position], true)
+                    val selectedFont = adapter.fontKeyList[position]
+                    selectFont(selectedFont)
+                    fontChanged = true // Set the fontChanged flag
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -211,13 +227,15 @@ class ConfigBottomSheetDialogFragment : BottomSheetDialogFragment() {
             }
     }
 
-    private fun selectFont(selectedFont: String, isReloadNeeded: Boolean) {
+    private fun selectFont(selectedFont: String) {
         // parse font from name
         config.font = selectedFont
+        AppUtil.saveConfig(activity, config)
 
-        if (isAdded && isReloadNeeded) {
-            AppUtil.saveConfig(activity, config)
+        // Check if the font has changed and post ReloadDataEvent if necessary
+        if (fontChanged) {
             EventBus.getDefault().post(ReloadDataEvent())
+            fontChanged = false // Reset the flag
         }
     }
 
@@ -282,28 +300,49 @@ class ConfigBottomSheetDialogFragment : BottomSheetDialogFragment() {
         colorAnimation.start()
     }
 
-    private fun configSeekBar() {
-        val thumbDrawable = ContextCompat.getDrawable(activity!!, R.drawable.seekbar_thumb)
-        UiUtil.setColorIntToDrawable(config.currentThemeColor, thumbDrawable)
-        UiUtil.setColorResToDrawable(
-            R.color.grey_color,
-            view_config_font_size_seek_bar.progressDrawable
-        )
-        view_config_font_size_seek_bar.thumb = thumbDrawable
+    private var debounceFuture: ScheduledFuture<*>? = null
+    private val debounceExecutor = Executors.newSingleThreadScheduledExecutor()
 
-        view_config_font_size_seek_bar.setOnSeekBarChangeListener(object :
-            SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                config.fontSize = progress
-                AppUtil.saveConfig(activity, config)
-                EventBus.getDefault().post(ReloadDataEvent())
+    private fun configFontSizeButtons() {
+        view_config_font_size_btn_decrease.setOnClickListener {
+            if (config.fontSize > 1) {
+                config.fontSize -= 1
+                view_config_fontSize.text = config.fontSize.toString()
+
+                debounce {
+                    AppUtil.saveConfig(activity, config)
+                    EventBus.getDefault().post(ReloadDataEvent())
+                }
             }
+        }
 
-            override fun onStartTrackingTouch(seekBar: SeekBar) {}
+        view_config_font_size_btn_increase.setOnClickListener {
+            if (config.fontSize < 10) {
+                config.fontSize += 1
+                view_config_fontSize.text = config.fontSize.toString()
 
-            override fun onStopTrackingTouch(seekBar: SeekBar) {}
-        })
+                debounce {
+                    AppUtil.saveConfig(activity, config)
+                    EventBus.getDefault().post(ReloadDataEvent())
+                    print("DEBOUNCE EXECUTEDD!!")
+                }
+            }
+        }
     }
+
+    fun debounce(
+        delayMillis: Long = 300,
+        action: () -> Unit
+    ) {
+        // Cancel any previous debounce task
+        debounceFuture?.cancel(false)
+
+        // Schedule a new debounce task
+        debounceFuture = debounceExecutor.schedule({
+            action()
+        }, delayMillis, TimeUnit.MILLISECONDS)
+    }
+
 
     private fun setToolBarColor() {
         if (isNightMode) {
