@@ -20,8 +20,8 @@ class FontAdapter(
     private val userFonts: Map<String, File> = FontFinder.getUserFonts(),
     private val systemFonts: Map<String, File> = FontFinder.getSystemFonts(),
     val fontKeyList: List<String> =
-        ArrayList<String>(userFonts.keys.toTypedArray().sorted()) +
-                ArrayList<String>(systemFonts.keys.toTypedArray().sorted())
+        ArrayList<String>(systemFonts.keys.toTypedArray().sorted())
+
 ) : ArrayAdapter<String>(context, android.R.layout.simple_spinner_dropdown_item, fontKeyList) {
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
@@ -56,6 +56,7 @@ class FontAdapter(
             context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
         val view = inflater.inflate(R.layout.item_styled_text, null) as TextView
+
 
         val fontKey = fontKeyList[position]
 

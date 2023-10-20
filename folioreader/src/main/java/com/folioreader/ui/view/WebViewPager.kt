@@ -21,6 +21,7 @@ class WebViewPager : ViewPager {
     }
 
     internal var horizontalPageCount: Int = 0
+    private var currentPageCount: Int = 0
     private var folioWebView: FolioWebView? = null
     private var takeOverScrolling: Boolean = false
     var isScrolling: Boolean = false
@@ -111,9 +112,14 @@ class WebViewPager : ViewPager {
     @JavascriptInterface
     fun setCurrentPage(pageIndex: Int) {
         Log.v(LOG_TAG, "-> setCurrentItem -> pageIndex = $pageIndex")
-
+        this.currentPageCount = pageIndex
         uiHandler!!.post { setCurrentItem(pageIndex, false) }
     }
+
+    fun getCurrentPage(): Int{
+        return this.currentPageCount;
+    }
+
 
     @JavascriptInterface
     fun setPageToLast() {

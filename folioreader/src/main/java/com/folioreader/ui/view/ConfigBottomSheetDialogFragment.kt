@@ -41,7 +41,7 @@ import java.util.concurrent.TimeUnit
 class ConfigBottomSheetDialogFragment : BottomSheetDialogFragment() {
 
     companion object {
-        const val FADE_DAY_NIGHT_MODE = 500
+        const val FADE_DAY_NIGHT_MODE = 10
 
         @JvmField
         val LOG_TAG: String = ConfigBottomSheetDialogFragment::class.java.simpleName
@@ -72,7 +72,6 @@ class ConfigBottomSheetDialogFragment : BottomSheetDialogFragment() {
 //            val behavior = BottomSheetBehavior.from(bottomSheet!!)
 //            behavior.state = BottomSheetBehavior.STATE_EXPANDED
 //            behavior.peekHeight = 500
-//
 //        }
 
         config = AppUtil.getSavedConfig(activity)!!

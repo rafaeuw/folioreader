@@ -91,13 +91,27 @@
             android:src="@drawable/paragraph_icon_night_mode_low_contrast"
             tools:ignore="MissingConstraints"
             android:layout_marginRight="15dp"/>
+
+        <ImageButton
+            android:id="@+id/view_config_ib_cream_mode"
+            android:layout_width="70dp"
+            android:layout_height="100dp"
+            android:paddingRight="15dp"
+            android:background="@drawable/cream_rounded_corner_background"
+            app:layout_constraintEnd_toStartOf="@+id/view_config_ib_night_mode"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/view_config_font_type"
+            android:scaleType="fitStart"
+            android:src="@drawable/paragraph_icon_light_mode"
+            tools:ignore="MissingConstraints"
+            android:layout_marginRight="15dp"/>
         </LinearLayout>
     </HorizontalScrollView>
 
     <LinearLayout
         android:id="@+id/view_config_font_size_ll"
         android:layout_width="0dp"
-        android:layout_height="100dp"
+        android:layout_height="95dp"
         android:orientation="horizontal"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

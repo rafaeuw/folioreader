@@ -66,7 +66,7 @@ public final class HtmlUtil {
         // Inject CSS & user font style
         String toInject = "\n" + cssPath + "\n" + jsPath + "\n";
 
-        File userFontFile = FontFinder.getFontFile(fontName);
+        File userFontFile = FontFinder.getFontFile(fontName, context);
         if (userFontFile != null) {
             System.out.println("Injected user font into CSS");
             System.out.println("  - path: " + userFontFile.getAbsolutePath());

@@ -1,7 +1,11 @@
 package com.folioreader.util
 
+import android.content.Context
+import android.content.res.AssetManager
 import android.os.Environment
 import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 
 /**
  * @author Tyler Sedlar
@@ -40,7 +44,7 @@ object FontFinder {
         val fonts = HashMap<String, File>()
 
         val fontDirs = arrayOf(
-            File(Environment.getExternalStorageDirectory(), "Fonts/")
+            File(Environment.getExternalStorageDirectory(), "fonts/")
         )
         val fontSuffix = ".ttf"
 
@@ -57,11 +61,26 @@ object FontFinder {
                     }
             }
         }
+        println("--------------USER FONTS: -----------------------")
+        println(fonts)
+        println("------------------ DONE USER FONTS --------------------")
         return fonts
     }
 
+    @Throws(IOException::class)
+    private fun copyAssetToFile(assetManager: AssetManager, assetPath: String, destinationFile: File) {
+        val inputStream = assetManager.open(assetPath)
+        val outputStream = FileOutputStream(destinationFile)
+
+        inputStream.use { input ->
+            outputStream.use { output ->
+                input.copyTo(output)
+            }
+        }
+    }
+
     @JvmStatic
-    fun getFontFile(key: String): File? {
+    fun getFontFile(key: String, context: Context): File? {
         val system = getSystemFonts()
         val user = getUserFonts()
 

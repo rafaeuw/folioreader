@@ -127,7 +127,9 @@ class FolioWebView : WebView {
     fun getDirection(): String {
         return folioActivityCallback.direction.toString()
     }
-
+    fun getHorizontalPageCount(): Int {
+        return this.horizontalPageCount
+    }
     @JavascriptInterface
     fun getTopDistraction(unitString: String): Int {
         val unit = DisplayUnit.valueOf(unitString)
