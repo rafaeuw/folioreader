@@ -2325,7 +2325,7 @@ public class DirectionalViewpager extends ViewGroup {
             }
         }
         if (mInternalPageChangeListener != null) {
-            mInternalPageChangeListener.onPageSelected(position);
+            mInternalPageChangeListener. onPageSelected(position);
         }
     }
 

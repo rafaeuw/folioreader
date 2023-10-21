@@ -38,7 +38,36 @@ object FontFinder {
 
         return fonts
     }
+    @JvmStatic
+    fun getAssetsFonts(context: Context): Map<String, File> {
+        val fonts = HashMap<String, File>()
 
+        // List of font files in the assets/fonts directory
+        val fontDir = "fonts" // Change this to the actual directory where your fonts are stored in assets
+        val assetManager = context.assets
+
+        try {
+            val assetFontFiles = assetManager.list(fontDir)
+            if (assetFontFiles != null) {
+                for (assetFontFile in assetFontFiles) {
+                    val fontName = assetFontFile
+                    val key = fontName.subSequence(0, fontName.lastIndexOf(".")).toString()
+                    // Copy the font file from assets to a temporary directory
+                    val fontFile = File(context.cacheDir, assetFontFile)
+                    context.assets.open("$fontDir/$assetFontFile").use { input ->
+                        fontFile.outputStream().use { output ->
+                            input.copyTo(output)
+                        }
+                    }
+                    fonts[key] = fontFile
+                }
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+
+        return fonts
+    }
     @JvmStatic
     fun getUserFonts(): Map<String, File> {
         val fonts = HashMap<String, File>()
@@ -82,8 +111,11 @@ object FontFinder {
     @JvmStatic
     fun getFontFile(key: String, context: Context): File? {
         val system = getSystemFonts()
-        val user = getUserFonts()
-
+        val user = getAssetsFonts(context)
+        println("IN GETFONTFILE")
+        println("ALL FONTS:" + user)
+        println("REQUESTED FONT: " + key)
+        println(user[key])
         return when {
             system.containsKey(key) -> system[key]
             user.containsKey(key) -> user[key]

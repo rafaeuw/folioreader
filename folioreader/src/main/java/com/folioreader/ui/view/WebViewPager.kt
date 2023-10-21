@@ -21,7 +21,7 @@ class WebViewPager : ViewPager {
     }
 
     internal var horizontalPageCount: Int = 0
-    private var currentPageCount: Int = 0
+    private var currentPage: Int = 0
     private var folioWebView: FolioWebView? = null
     private var takeOverScrolling: Boolean = false
     var isScrolling: Boolean = false
@@ -74,6 +74,8 @@ class WebViewPager : ViewPager {
             override fun onPageSelected(position: Int) {
 //
                 Log.v(LOG_TAG, "-> onPageSelected -> $position")
+                folioWebView?.updateHorizontalPage(position)
+
 //                val intent = Intent(this@WebViewPager.context,FolioPageFragment::class.java).apply {
 //                    putExtra("pageNo", position)
 //                }
@@ -112,12 +114,12 @@ class WebViewPager : ViewPager {
     @JavascriptInterface
     fun setCurrentPage(pageIndex: Int) {
         Log.v(LOG_TAG, "-> setCurrentItem -> pageIndex = $pageIndex")
-        this.currentPageCount = pageIndex
+
         uiHandler!!.post { setCurrentItem(pageIndex, false) }
     }
 
     fun getCurrentPage(): Int{
-        return this.currentPageCount;
+        return this.currentPage;
     }
 
 

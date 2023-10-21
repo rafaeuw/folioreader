@@ -161,6 +161,10 @@ class FolioWebView : WebView {
         return popupWindow.isShowing
     }
 
+    fun updateHorizontalPage(pageIndex: Int){
+        parentFragment.updateHorizontalPageProgress(pageIndex)
+    }
+
     private inner class HorizontalGestureListener : GestureDetector.SimpleOnGestureListener() {
 
         override fun onScroll(

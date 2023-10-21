@@ -418,7 +418,7 @@ class FolioPageFragment : Fragment(),
             override fun onScrollChange(percent: Int) {
                 setIndicatorVisibility()
                 mScrollSeekbar!!.setProgressAndThumb(percent)
-                updatePagesLeftText(percent)
+                updateVerticalPageProgress(percent)
             }
         })
 
@@ -727,56 +727,79 @@ class FolioPageFragment : Fragment(),
     }
 
 
-    private fun updatePagesLeftText(scrollY: Int) {
-        if(mConfig!!.direction == Config.Direction.VERTICAL) {
-           try {
-               val currentChapter = mActivityCallback!!.currentChapterIndex + 1
-               val currentPage = (ceil(scrollY.toDouble() / mWebview!!.webViewHeight) + 1).toInt()
-                val totalPages =
-                    ceil(mWebview!!.contentHeightVal.toDouble() / mWebview!!.webViewHeight).toInt()
-                val pagesRemaining = totalPages - currentPage
-                val pagesRemainingStrFormat = if (pagesRemaining > 1)
-                    getString(R.string.pages_left)
-                else
-                    getString(R.string.page_left)
-                val pagesRemainingStr = String.format(
-                    Locale.US,
-                    pagesRemainingStrFormat, pagesRemaining
-                )
-
-                val minutesRemaining =
-                    ceil((pagesRemaining * mTotalMinutes).toDouble() / totalPages).toInt()
-                val minutesRemainingStr: String
-                minutesRemainingStr = if (minutesRemaining > 1) {
-                    String.format(
-                        Locale.US, getString(R.string.minutes_left),
-                        minutesRemaining
-                    )
-                } else if (minutesRemaining == 1) {
-                    String.format(
-                        Locale.US, getString(R.string.minute_left),
-                        minutesRemaining
-                    )
-                } else {
-                    getString(R.string.less_than_minute)
-                }
-
-                mMinutesLeftTextView!!.text = minutesRemainingStr
-                currentPageIndicator!!.text = "Page " + currentPage.toString()+ "/" + totalPages.toString()
-                currentChapterIndicator!!.text = "Chapter " + currentChapter.toString()
-            } catch (exp: java.lang.ArithmeticException) {
-                Log.e("divide error", exp.toString())
-            } catch (exp: IllegalStateException) {
-                Log.e("divide error", exp.toString())
-            }
+    private fun updateVerticalPageProgress(scrollY: Int) {
+        if(mConfig!!.direction != Config.Direction.VERTICAL) {
+            return
         }
 
-        else{
+       try {
             val currentChapter = mActivityCallback!!.currentChapterIndex + 1
-            println("------------------- PAGE: " + webViewPager?.getCurrentPage() + " ------------------")
-            currentPageIndicator!!.text =  webViewPager?.horizontalPageCount.toString() + " Pages"
-            currentChapterIndicator!!.text = "Chapter " + currentChapter.toString()
+            val currentPage = (ceil(scrollY.toDouble() / mWebview!!.webViewHeight) + 1).toInt()
+            val totalPages = ceil(mWebview!!.contentHeightVal.toDouble() / mWebview!!.webViewHeight).toInt()
+            val pagesRemaining = totalPages - currentPage
+            val minutesRemaining = ceil((pagesRemaining * mTotalMinutes).toDouble() / totalPages).toInt()
 
+            val minutesRemainingStr: String
+            minutesRemainingStr = if (minutesRemaining > 1) {
+                String.format(
+                    Locale.US, getString(R.string.minutes_left),
+                    minutesRemaining
+                )
+            } else if (minutesRemaining == 1) {
+                String.format(
+                    Locale.US, getString(R.string.minute_left),
+                    minutesRemaining
+                )
+            } else {
+                getString(R.string.less_than_minute)
+            }
+
+            mMinutesLeftTextView!!.text = minutesRemainingStr
+            currentPageIndicator!!.text = "Page " + currentPage.toString()+ "/" + totalPages.toString()
+            currentChapterIndicator!!.text = "Chapter " + currentChapter.toString()
+        } catch (exp: java.lang.ArithmeticException) {
+            Log.e("divide error", exp.toString())
+        } catch (exp: IllegalStateException) {
+            Log.e("divide error", exp.toString())
+        }
+    }
+
+
+    public fun updateHorizontalPageProgress(currentPageIndex: Int){
+        if(mConfig!!.direction != Config.Direction.HORIZONTAL) {
+            return
+        }
+
+        try {
+            val currentChapter = mActivityCallback!!.currentChapterIndex + 1
+            val currentPage = currentPageIndex + 1
+            val totalPages = webViewPager!!.horizontalPageCount
+            val pagesRemaining = totalPages - currentPage
+            val minutesRemaining =
+                ceil((pagesRemaining * mTotalMinutes).toDouble() / totalPages).toInt()
+
+            val minutesRemainingStr: String
+            minutesRemainingStr = if (minutesRemaining > 1) {
+                String.format(
+                    Locale.US, getString(R.string.minutes_left),
+                    minutesRemaining
+                )
+            } else if (minutesRemaining == 1) {
+                String.format(
+                    Locale.US, getString(R.string.minute_left),
+                    minutesRemaining
+                )
+            } else {
+                getString(R.string.less_than_minute)
+            }
+
+            mMinutesLeftTextView!!.text = minutesRemainingStr
+            currentPageIndicator!!.text = "Page " + currentPage.toString()+ "/" + totalPages.toString()
+            currentChapterIndicator!!.text = "Chapter " + currentChapter.toString()
+        } catch (exp: java.lang.ArithmeticException) {
+            Log.e("divide error", exp.toString())
+        } catch (exp: IllegalStateException) {
+            Log.e("divide error", exp.toString())
         }
     }
 
