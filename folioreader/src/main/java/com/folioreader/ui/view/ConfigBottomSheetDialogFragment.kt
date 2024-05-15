@@ -20,7 +20,8 @@ import com.folioreader.R
 import com.folioreader.model.event.ReloadDataEvent
 import com.folioreader.ui.activity.FolioActivity
 import com.folioreader.ui.activity.FolioActivityCallback
-import com.folioreader.ui.adapter.FontAdapter
+import com.folioreader.ui.adapter.FontArabicAdapter
+import com.folioreader.ui.adapter.FontLatinAdapter
 import com.folioreader.ui.fragment.MediaControllerFragment
 import com.folioreader.util.AppUtil
 import com.folioreader.util.UiUtil
@@ -85,10 +86,12 @@ class ConfigBottomSheetDialogFragment : BottomSheetDialogFragment() {
 
     private fun initViews() {
         inflateView()
-        configFonts()
+        configArabicFonts()
+//        configLatinFonts()
         view_config_fontSize.text = config.fontSize.toString()
         configFontSizeButtons()
-        selectFont(config.font)
+        selectFontArabic(config.fontArabic)
+//        selectFontLatin(config.fontLatin)
         isNightMode = config.isNightMode
         if (isNightMode) {
             container.setBackgroundColor(ContextCompat.getColor(context!!, R.color.night))
@@ -101,6 +104,7 @@ class ConfigBottomSheetDialogFragment : BottomSheetDialogFragment() {
             UiUtil.setColorResToDrawable(R.color.lightText, view_config_font_size_btn_decrease.drawable)
 
             view_config_font_type.background = ContextCompat.getDrawable(context!!, R.drawable.buttons_night_rounded_corner_background)
+//            view_config_font_type_latin.background = ContextCompat.getDrawable(context!!, R.drawable.buttons_night_rounded_corner_background)
         } else {
             container.setBackgroundColor(ContextCompat.getColor(context!!, R.color.white))
             view_config_fontSize.setTextColor(ContextCompat.getColor(context!!, R.color.night))
@@ -112,6 +116,7 @@ class ConfigBottomSheetDialogFragment : BottomSheetDialogFragment() {
             UiUtil.setColorResToDrawable(R.color.night, view_config_font_size_btn_decrease.drawable)
 
             view_config_font_type.background = ContextCompat.getDrawable(context!!, R.drawable.buttons_day_rounded_corner_background)
+//            view_config_font_type_latin.background = ContextCompat.getDrawable(context!!, R.drawable.buttons_day_rounded_corner_background)
         }
 
         if (isNightMode) {
@@ -181,9 +186,10 @@ class ConfigBottomSheetDialogFragment : BottomSheetDialogFragment() {
     }
 
 
-    private var fontChanged = false
+    private var fontChangedArabic = false
+    private var fontChangedLatin = false
     @SuppressLint("ResourceAsColor")
-    private fun configFonts() {
+    private fun configArabicFonts() {
         val colorStateList = UiUtil.getColorList(
             config.currentThemeColor,
             ContextCompat.getColor(context!!, R.color.grey_color)
@@ -192,7 +198,7 @@ class ConfigBottomSheetDialogFragment : BottomSheetDialogFragment() {
         buttonVertical.setTextColor(colorStateList)
         buttonHorizontal.setTextColor(colorStateList)
 
-        val adapter = FontAdapter(config, context!!)
+        val adapter = FontArabicAdapter(config, context!!)
 
         view_config_font_spinner.adapter = adapter
 
@@ -205,7 +211,8 @@ class ConfigBottomSheetDialogFragment : BottomSheetDialogFragment() {
             PorterDuff.Mode.SRC_ATOP
         )
 
-        val fontIndex = adapter.fontKeyList.indexOf(config.font)
+        val fontIndex = adapter.fontArabicKeyList.indexOf(config.fontArabic)
+        println("configArabicFonts fontIndex:$fontIndex " )
         view_config_font_spinner.setSelection(if (fontIndex < 0) 0 else fontIndex)
 
         view_config_font_spinner.onItemSelectedListener =
@@ -216,9 +223,9 @@ class ConfigBottomSheetDialogFragment : BottomSheetDialogFragment() {
                     position: Int,
                     id: Long
                 ) {
-                    val selectedFont = adapter.fontKeyList[position]
-                    selectFont(selectedFont)
-                    fontChanged = true // Set the fontChanged flag
+                    val selectedFont = adapter.fontArabicKeyList[position]
+                    selectFontArabic(selectedFont)
+                    fontChangedArabic = true // Set the fontChanged flag
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -226,17 +233,72 @@ class ConfigBottomSheetDialogFragment : BottomSheetDialogFragment() {
             }
     }
 
-    private fun selectFont(selectedFont: String) {
+    private fun selectFontArabic(selectedFont: String) {
         // parse font from name
-        config.font = selectedFont
+        config.fontArabic = selectedFont
         AppUtil.saveConfig(activity, config)
 
         // Check if the font has changed and post ReloadDataEvent if necessary
-        if (fontChanged) {
+        if (fontChangedArabic) {
             EventBus.getDefault().post(ReloadDataEvent())
-            fontChanged = false // Reset the flag
+            fontChangedArabic = false // Reset the flag
         }
     }
+
+//    @SuppressLint("ResourceAsColor")
+//    private fun configLatinFonts(){
+//        val colorStateList = UiUtil.getColorList(
+//            config.currentThemeColor,
+//            ContextCompat.getColor(context!!, R.color.grey_color)
+//        )
+//
+//        buttonVertical.setTextColor(colorStateList)
+//        buttonHorizontal.setTextColor(colorStateList)
+//
+//        val adapter = FontLatinAdapter(context!!,config)
+//
+//        view_config_font_latin_spinner.adapter = adapter
+//
+//        view_config_font_latin_spinner.background.setColorFilter(
+//            if (config.isNightMode) {
+//                R.color.night_default_font_color
+//            } else {
+//                R.color.day_default_font_color
+//            },
+//            PorterDuff.Mode.SRC_ATOP
+//        )
+//
+//        val fontIndex = adapter.fontLatinKeyList.indexOf(config.fontLatin)
+//        println("configLatinFonts fontIndex:$fontIndex " )
+//
+//        view_config_font_latin_spinner.setSelection(if (fontIndex < 0) 0 else fontIndex)
+//
+//        view_config_font_latin_spinner.onItemSelectedListener=object:AdapterView.OnItemSelectedListener{
+//            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, position: Int, id: Long) {
+//                val selectedFont = adapter.fontLatinKeyList[position]
+//                selectFontLatin(selectedFont)
+//                fontChangedLatin = true
+//            }
+//
+//            override fun onNothingSelected(p0: AdapterView<*>?) {
+//
+//            }
+//        }
+//
+//
+//    }
+//
+//    private fun selectFontLatin(selectedFont: String){
+//        config.fontLatin = selectedFont
+//        AppUtil.saveConfig(activity,config)
+//
+//        // Trigger reload  untuk mengganti font di epub
+//        if (fontChangedLatin){
+//            EventBus.getDefault().post(ReloadDataEvent())
+//
+//            fontChangedLatin = false // Reset the flag
+//        }
+//    }
 
     private fun toggleBlackTheme() {
 

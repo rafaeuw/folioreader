@@ -24,9 +24,10 @@ object FontFinder {
 
         val sysFontDir = File("/system/fonts/")
         val fontSuffix = ".ttf"
+        println("sysFontDir: " + sysFontDir.absolutePath)
 
         // Collect system fonts
-        for (fontFile in sysFontDir.listFiles()) {
+        for (fontFile in sysFontDir.listFiles()!!) {
             val fontName: String = fontFile.name
             if (fontName.endsWith(fontSuffix)) {
                 val key = fontName.subSequence(0, fontName.lastIndexOf(fontSuffix)).toString()
@@ -43,8 +44,9 @@ object FontFinder {
         val fonts = HashMap<String, File>()
 
         // List of font files in the assets/fonts directory
-        val fontDir = "fonts" // Change this to the actual directory where your fonts are stored in assets
+        val fontDir = "fonts/arabic" // Change this to the actual directory where your fonts are stored in assets
         val assetManager = context.assets
+        println("fontDir: $fontDir")
 
         try {
             val assetFontFiles = assetManager.list(fontDir)
@@ -113,9 +115,11 @@ object FontFinder {
         val system = getSystemFonts()
         val user = getAssetsFonts(context)
         println("IN GETFONTFILE")
-        println("ALL FONTS:" + user)
+//        println("ALL FONTS USER:" + user)
+//        println("ALL FONTS SYSTEM:" + system)
         println("REQUESTED FONT: " + key)
-        println(user[key])
+        println("user font: " +user[key])
+        println("system font: "+system[key])
         return when {
             system.containsKey(key) -> system[key]
             user.containsKey(key) -> user[key]

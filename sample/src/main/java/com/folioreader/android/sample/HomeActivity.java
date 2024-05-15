@@ -68,6 +68,7 @@ public class HomeActivity extends AppCompatActivity
                     config = new Config();
                 config.setAllowedDirection(Config.AllowedDirection.VERTICAL_AND_HORIZONTAL);
 
+
                 folioReader.setConfig(config, true)
                         .openBook(R.raw.accessible_epub_3);
             }
@@ -89,7 +90,7 @@ public class HomeActivity extends AppCompatActivity
 
                 folioReader.setReadLocator(readLocator);
                 folioReader.setConfig(config, true)
-                        .openBook("file:///android_asset/Surviving The Last Days.epub");
+                        .openBook("file:///android_asset/mark_manson_arab.epub");
             }
         });
     }

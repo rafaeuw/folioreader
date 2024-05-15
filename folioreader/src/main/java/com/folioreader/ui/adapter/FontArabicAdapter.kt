@@ -14,19 +14,18 @@ import com.folioreader.R
 import com.folioreader.util.FontFinder
 import java.io.File
 
-class FontAdapter(
+class FontArabicAdapter(
     private val config: Config,
     context: Context,
     private val userFonts: Map<String, File> = FontFinder.getAssetsFonts(context),
-    private val systemFonts: Map<String, File> = FontFinder.getSystemFonts(),
-    val fontKeyList: List<String> =
+    val fontArabicKeyList: List<String> =
         ArrayList<String>(userFonts.keys.toTypedArray().sorted())
 
-) : ArrayAdapter<String>(context, android.R.layout.simple_spinner_dropdown_item, fontKeyList) {
+) : ArrayAdapter<String>(context, android.R.layout.simple_spinner_dropdown_item, fontArabicKeyList) {
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-        println("GET VIEW CALLED!")
-        println("GET VIEW CALLED!")
+        println("GET VIEW ARABIC CALLED!")
+        println("GET VIEW ARABIC CALLED!")
         val view = createTextView(position)
 
         if (config.isNightMode) {
@@ -39,7 +38,7 @@ class FontAdapter(
     }
 
     override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
-        println("GET DROP DOWN VIEW CALLED!")
+        println("GET DROP DOWN ARABIC VIEW CALLED!")
         println(position)
 
         val view = createTextView(position)
@@ -63,21 +62,22 @@ class FontAdapter(
         val view = inflater.inflate(R.layout.item_styled_text, null) as TextView
 
 
-        val fontKey = fontKeyList[position]
-        println("FONTKEY LIST: -----------------"  )
-        println(fontKeyList)
-        println("UserFonts LIST: -----------------"  )
-        println(userFonts)
+        val fontKey = fontArabicKeyList[position]
+        println("FONTKEY userFonts: $fontKey")
+//        println("FONTKEY LIST: -----------------"  )
+//        println(fontArabicKeyList)
+//        println("UserFonts LIST: -----------------"  )
+//        println(userFonts)
 
         view.text = fontKey
 
-        if (userFonts.containsKey(fontKey)) {
-            println(userFonts[fontKey])
-            view.typeface = Typeface.createFromFile(userFonts[fontKey])
-            view.textSize = 21F
-        } else if (systemFonts.containsKey(fontKey)) {
-            view.typeface = Typeface.createFromFile(systemFonts[fontKey])
-        }
+//        if (userFonts.containsKey(fontKey)) {
+        println("createTextView" + userFonts[fontKey])
+        view.typeface = Typeface.createFromFile(userFonts[fontKey])
+        view.textSize = 21F
+//        } else if (systemFonts.containsKey(fontKey)) {
+//            view.typeface = Typeface.createFromFile(systemFonts[fontKey])
+//        }
 
         return view
     }
