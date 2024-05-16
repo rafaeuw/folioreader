@@ -70,42 +70,42 @@ public final class HtmlUtil {
 
         File arabicFontFile = FontFinder.getFontFile(fontNameArabic, context);
         File latinFontFile = FontFinder.getFontFile(fontNameLatin, context);
-        if (arabicFontFile != null) {
-            System.out.println("Injected user font into CSS");
-            System.out.println("  - path latin: " + arabicFontFile.getAbsolutePath());
-            System.out.println("  - family latin: '" + fontNameArabic + "'");
-            toInject += "<style>\n";
-            toInject += "@font-face {\n";
-            toInject += "  font-family: '" + fontNameArabic + "';\n";
-            toInject += "  src: url('file://" + arabicFontFile.getAbsolutePath() + "');\n";
-            toInject += "}\n";
-            toInject += ".custom-font, .custom-font p, .custom-font div, .custom-font span, .custom-font h1, .custom-font strong {\n";
-            toInject += "  font-family: '" + fontNameArabic + "', sans-serif;\n";
-            toInject += "}\n";
-            toInject += "\n</style>";
-        }
-
-//        if (latinFontFile != null) {
+//        if (arabicFontFile != null) {
 //            System.out.println("Injected user font into CSS");
-//            System.out.println("  - path latin: " + latinFontFile.getAbsolutePath());
-//            System.out.println("  - family latin: '" + fontNameLatin + "'");
+//            System.out.println("  - path latin: " + arabicFontFile.getAbsolutePath());
+//            System.out.println("  - family latin: '" + fontNameArabic + "'");
 //            toInject += "<style>\n";
 //            toInject += "@font-face {\n";
-//            toInject += "  font-family: '" + latinFontFile + "';\n";
-//            toInject += "  src: url('file://" + latinFontFile.getAbsolutePath() + "');\n";
+//            toInject += "  font-family: '" + fontNameArabic + "';\n";
+//            toInject += "  src: url('file://" + arabicFontFile.getAbsolutePath() + "');\n";
 //            toInject += "}\n";
 //            toInject += ".custom-font, .custom-font p, .custom-font div, .custom-font span, .custom-font h1, .custom-font strong {\n";
-//            toInject += "  font-family: '" + fontNameLatin + "', sans-serif;\n";
+//            toInject += "  font-family: '" + fontNameArabic + "', sans-serif;\n";
 //            toInject += "}\n";
 //            toInject += "\n</style>";
 //        }
+
+        if (latinFontFile != null) {
+            System.out.println("Injected user font into CSS");
+            System.out.println("  - path latin: " + latinFontFile.getAbsolutePath());
+            System.out.println("  - family latin: '" + fontNameLatin + "'");
+            toInject += "<style>\n";
+            toInject += "@font-face {\n";
+            toInject += "  font-family: '" + fontNameLatin + "';\n";
+            toInject += "  src: url('file://" + latinFontFile.getAbsolutePath() + "');\n";
+            toInject += "}\n";
+            toInject += ".custom-font, .custom-font p, .custom-font div, .custom-font span, .custom-font h1, .custom-font strong {\n";
+            toInject += "  font-family: '" + fontNameLatin + "', sans-serif;\n";
+            toInject += "}\n";
+            toInject += "\n</style>";
+        }
 
 
         toInject += "</head>";
 
         htmlContent = htmlContent.replace("</head>", toInject);
 
-        System.out.println("HTML CONTENT FIRST" + htmlContent);
+//        System.out.println("HTML CONTENT FIRST" + htmlContent);
 
         String classes = "custom-font";
 
@@ -148,14 +148,15 @@ public final class HtmlUtil {
                 break;
         }
 
-        String styles = "font-family: '" + fontNameArabic + "';";
+//        String styles = "font-family: '" + fontNameArabic + "';";
+        String styles = "font-family: '" + fontNameLatin + "';";
 
         htmlContent = htmlContent.replace("<html",
                 "<html class=\"" + classes + "\"" +
                         " style=\"" + styles + "\"" +
                         " onclick=\"onClickHtml()\"");
 
-        System.out.println("HTML CONTENT SECOND" + htmlContent);
+//        System.out.println("HTML CONTENT SECOND" + htmlContent);
 
         return htmlContent;
     }
